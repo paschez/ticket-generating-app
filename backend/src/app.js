@@ -16,7 +16,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: 'https://ticket-generating-app-1.onrender.com',
+    origin: true,
     credentials: true,
   })
 );
