@@ -26,15 +26,37 @@ const eventLoader = async ({ params }) => {
   return data;
 };
 
+// Update your protected loaders to handle 401 errors cleanly
+
 const dashboardLoader = async () => {
-  const { data } = await api.get('/tickets/my');
-  return data;
+  try {
+    const { data } = await api.get('/tickets/my');
+    return data;
+  } catch (error) {
+    if (error.response?.status === 401) {
+      // Clean up local storage so the UI matches the logged-out state
+      localStorage.removeItem('event-ticketing-auth-user');
+      window.dispatchEvent(new CustomEvent('auth:user', { detail: null }));
+      return redirect('/login');
+    }
+    throw error; // Let unexpected errors bubble up to your ErrorBoundary
+  }
 };
 
 const adminLoader = async () => {
-  const { data } = await api.get('/events/dashboard');
-  return data;
+  try {
+    const { data } = await api.get('/events/dashboard');
+    return data;
+  } catch (error) {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('event-ticketing-auth-user');
+      window.dispatchEvent(new CustomEvent('auth:user', { detail: null }));
+      return redirect('/login');
+    }
+    throw error;
+  }
 };
+
 
 const loginAction = async ({ request }) => {
   const formData = await request.formData();
